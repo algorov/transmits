@@ -1,10 +1,10 @@
+import os
 import queue
+import json
 
-from telegram import ForceReply, Update
+from telegram import Update
 from telegram.ext import Application, CommandHandler, ContextTypes, MessageHandler, filters
 from dotenv import load_dotenv
-import os
-import json
 
 
 class Bot:
@@ -13,22 +13,23 @@ class Bot:
         self.bot_token = None
         self.in_queue = in_queue
         self.out_queue = out_queue
+
         self.load_environment()
         self.create_application()
 
-    def load_environment(self):
+    def load_environment(self) -> None:
         load_dotenv()
         self.bot_token = os.getenv('BOT_TOKEN')
 
-    def create_application(self):
+    def create_application(self) -> None:
         self.application = Application.builder().token(self.bot_token).build()
         self.register_handlers()
 
-    def start(self):
+    def start(self) -> None:
         self.application.run_polling(allowed_updates=Update.ALL_TYPES)
 
     def validate_data(self, data: list) -> bool:
-        if data[0].isdigit() and 0 < len(data[1]) <= 512:
+        if data[0].isdigit() and 0 < len(data[0]) <= 20 and 0 < len(data[1]) <= 512:
             return True
         else:
             return False
@@ -44,7 +45,7 @@ class Bot:
 
         return json.dumps(this)
 
-    def register_handlers(self):
+    def register_handlers(self) -> None:
         self.application.add_handler(CommandHandler("start", self.start_command))
         self.application.add_handler(CommandHandler("help", self.help_command))
         self.application.add_handler(CommandHandler("post", self.post_command))
@@ -52,28 +53,31 @@ class Bot:
 
     async def start_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         user = update.effective_user
-        await update.message.reply_html(rf"Hi {user.mention_html()}! Чтобы узнать подробнее, нажми /help")
+        await update.message.reply_html(rf"Hi {user.mention_html()}! 🖖🏻 Чтобы узнать подробнее, пошлите /help")
 
     async def help_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         await update.message.reply_text(
-            "Чтобы отправить сообщение: /post\n"
-            "Чтоюы проверить почту: /get"
+            "❓Чтобы отправить сообщение: /post\n"
+            "❓Чтобы проверить почту: /get"
         )
 
     async def get_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         if not self.in_queue.empty():
-            await update.message.reply_text("Для вас есть кое-что!")
+            await update.message.reply_text("Для вас есть кое-что! ✅")
             while not self.in_queue.empty():
                 json_format = self.in_queue.get()
                 data = json.loads(json_format)
-                await update.message.reply_text(f'От {data.get("data").get("sender")}:\n {data.get("data").get("msg")}')
+                await update.message.reply_markdown(
+                    f'*От {data.get("data").get("sender")}:*\n {data.get("data").get("msg")}')
         else:
-            await update.message.reply_text("Для вас пока нет ничего нового!")
+            await update.message.reply_text("📌 Для вас пока нет ничего нового!")
 
     async def post_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-        await update.message.reply_text(
-            "Отправьте данные по одному сообщению: ID получателя в ВК и само сообщение.\n"
-            "Чтобы закончить - /back")
+        await update.message.reply_markdown(
+            "Отправьте данные по одному сообщению: \n"
+            "1️⃣ *ID получателя в VK*\n"
+            "2️⃣ *Cообщение*\n"
+            "Вернуться назад: /back")
 
         data = []
         step = 0
@@ -85,16 +89,16 @@ class Bot:
                 step = 0
                 self.application.remove_handler(txt_handler)
                 self.application.remove_handler(cmd_handler)
-                await update.message.reply_text("Сообщение отправлено!")
+                await update.message.reply_text("🔙 Отмена!")
             else:
                 data.append(update.message.text)
                 step += 1
                 if step == 2:
                     if self.validate_data(data):
                         self.out_queue.put(self.build_json(update.message.from_user.id, data))
-                        await update.message.reply_text("Сообщение отправлено!")
+                        await update.message.reply_text("Сообщение отправлено! 🙄")
                     else:
-                        await update.message.reply_text("Некорректные данные!")
+                        await update.message.reply_text("Некорректные данные! 🤬")
 
                     data = []
                     step = 0

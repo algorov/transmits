@@ -1,11 +1,9 @@
 import socket
 import queue
 import threading
-from Bot import Bot
 
-SERVER_HOST = '127.0.0.1'
-SERVER_PORT = 65432
-timeout = 3
+from bot.Bot import Bot
+from config import *
 
 rec_msg_queue = queue.Queue()
 depart_msg_queue = queue.Queue()
@@ -31,9 +29,11 @@ def listen_server(rec_queue: queue.Queue, depart_queue: queue.Queue):
             except queue.Empty:
                 print("[ERROR] Queue")
 
+
 def start_bot(rec_queue: queue.Queue, depart_queue: queue.Queue):
     bot = Bot(rec_queue, depart_queue)
     bot.start()
+
 
 if __name__ == '__main__':
     handler = threading.Thread(target=listen_server, args=(rec_msg_queue, depart_msg_queue))

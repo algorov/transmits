@@ -24,7 +24,10 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as server_socket:
         print('Connected by', addr)
         while True:
             conn.send(json_str)
+
+
+            data = conn.recv(1024, )
+            if data:
+                print(data.decode("utf-8"))
+
             sleep(5)
-
-
-
