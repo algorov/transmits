@@ -27,16 +27,16 @@ class Bot:
     def start(self):
         self.application.run_polling(allowed_updates=Update.ALL_TYPES)
 
-    def build_post(self, data: list, id: int) -> None:
-        somee = {
+    def build_json(self, data: list, id: int) -> str:
+        this = {
             "data": {
                 "sender": id,
                 "recipient": data[0],
-                "message": data[1]
+                "msg": data[1]
             }
         }
-        json_format = json.dumps(somee)
-        self.out_queue.put(json_format)
+
+        return json.dumps(this)
 
     def register_handlers(self):
         self.application.add_handler(CommandHandler("start", self.start_command))
@@ -56,13 +56,14 @@ class Bot:
 
     async def get_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         if not self.in_queue.empty():
+            await update.message.reply_text("Для вас есть кое-что!")
             while not self.in_queue.empty():
                 json_format = self.in_queue.get()
                 data = json.loads(json_format)
-                print("HEHEHEHEHEHEHEHE")
                 print(data)
+                await update.message.reply_text(f'От {data.get("data").get("sender")}:\n {data.get("data").get("msg")}')
         else:
-            await update.message.reply_text("Пока что нет новых сообщений!")
+            await update.message.reply_text("Для вас пока нет ничего нового!")
 
     async def post_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         await update.message.reply_text(
@@ -73,7 +74,6 @@ class Bot:
 
         async def process_data(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
             nonlocal data, step
-
             if update.message.text.lower() == '/done':
                 data = []
                 step = 0
@@ -81,10 +81,11 @@ class Bot:
                 self.application.remove_handler(cmd_handler)
             else:
                 data.append(update.message.text)
-
                 step += 1
                 if step == 2:
-                    self.build_post(data, update.message.from_user.id)
+                    post = self.build_json(data, update.message.from_user.id)
+                    self.out_queue.put(post)
+
                     data = []
                     step = 0
                     self.application.remove_handler(txt_handler)
