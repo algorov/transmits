@@ -27,7 +27,13 @@ class Bot:
     def start(self):
         self.application.run_polling(allowed_updates=Update.ALL_TYPES)
 
-    def build_json(self, data: list, id: int) -> str:
+    def validate_data(self, data: list) -> bool:
+        if data[0].isdigit() and 0 < len(data[1]) <= 512:
+            return True
+        else:
+            return False
+
+    def build_json(self, id: int, data: list) -> str:
         this = {
             "data": {
                 "sender": id,
@@ -46,13 +52,13 @@ class Bot:
 
     async def start_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         user = update.effective_user
-        await update.message.reply_html(
-            rf"Hi {user.mention_html()}!",
-            reply_markup=ForceReply(selective=True),
-        )
+        await update.message.reply_html(rf"Hi {user.mention_html()}! Чтобы узнать подробнее, нажми /help")
 
     async def help_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-        await update.message.reply_text("Help!")
+        await update.message.reply_text(
+            "Чтобы отправить сообщение: /post\n"
+            "Чтоюы проверить почту: /get"
+        )
 
     async def get_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         if not self.in_queue.empty():
@@ -60,40 +66,43 @@ class Bot:
             while not self.in_queue.empty():
                 json_format = self.in_queue.get()
                 data = json.loads(json_format)
-                print(data)
                 await update.message.reply_text(f'От {data.get("data").get("sender")}:\n {data.get("data").get("msg")}')
         else:
             await update.message.reply_text("Для вас пока нет ничего нового!")
 
     async def post_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         await update.message.reply_text(
-            "Отправьте данные по одному сообщению: ID в ВК и само сообщение. Чтобы закончить - /done")
+            "Отправьте данные по одному сообщению: ID получателя в ВК и само сообщение.\n"
+            "Чтобы закончить - /back")
 
         data = []
         step = 0
 
         async def process_data(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
             nonlocal data, step
-            if update.message.text.lower() == '/done':
+            if update.message.text.lower() == '/back':
                 data = []
                 step = 0
                 self.application.remove_handler(txt_handler)
                 self.application.remove_handler(cmd_handler)
+                await update.message.reply_text("Сообщение отправлено!")
             else:
                 data.append(update.message.text)
                 step += 1
                 if step == 2:
-                    post = self.build_json(data, update.message.from_user.id)
-                    self.out_queue.put(post)
+                    if self.validate_data(data):
+                        self.out_queue.put(self.build_json(update.message.from_user.id, data))
+                        await update.message.reply_text("Сообщение отправлено!")
+                    else:
+                        await update.message.reply_text("Некорректные данные!")
 
                     data = []
                     step = 0
                     self.application.remove_handler(txt_handler)
                     self.application.remove_handler(cmd_handler)
-                    await update.message.reply_text("Если запрос валидный, то всё будет классно!")
 
         txt_handler = MessageHandler(filters.TEXT, process_data)
-        cmd_handler = CommandHandler('done', process_data)
+        cmd_handler = CommandHandler('back', process_data)
         self.application.add_handler(txt_handler)
         self.application.add_handler(cmd_handler)
 
