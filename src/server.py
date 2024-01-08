@@ -25,3 +25,6 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as server_socket:
         while True:
             conn.send(json_str)
             sleep(5)
+
+
+
