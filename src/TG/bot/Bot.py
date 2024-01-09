@@ -43,7 +43,7 @@ class Bot:
             }
         }
 
-        return json.dumps(this)
+        return json.dumps(this)+"\n"
 
     def register_handlers(self) -> None:
         self.application.add_handler(CommandHandler("start", self.start_command))

@@ -7,7 +7,7 @@ from dotenv import load_dotenv
 from vk_api.longpoll import VkLongPoll
 
 load_dotenv()
-token = getenv('BOT_TOKEN') #"vk1.a.5xSRIXg8uyq6ICFOJFJJHJ8Y7bZPSSZZEAIrV6-BytPnfZs1GDT4awdLccRunivkoMKP-eHiIEZRgXHHP4xlWuRvzZ0kpozd83CfvrflxWldpbQn_nRgEpcl_d22P8D5semFaFu8q-Fxx3YJZnde95BSk5JMQFnzd-3IKA8xo7pnOkaVn-HrMByFNuKq5DVV4gIFJ8F9q4sReLOXXm1adA"
+token = getenv('BOT_TOKEN_VK') #"vk1.a.5xSRIXg8uyq6ICFOJFJJHJ8Y7bZPSSZZEAIrV6-BytPnfZs1GDT4awdLccRunivkoMKP-eHiIEZRgXHHP4xlWuRvzZ0kpozd83CfvrflxWldpbQn_nRgEpcl_d22P8D5semFaFu8q-Fxx3YJZnde95BSk5JMQFnzd-3IKA8xo7pnOkaVn-HrMByFNuKq5DVV4gIFJ8F9q4sReLOXXm1adA"
 
 vk_session = VkApi(token=token)
 vk = vk_session.get_api()
