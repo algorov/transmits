@@ -4,12 +4,11 @@ from vk_api.keyboard import VkKeyboard, VkKeyboardColor
 import datetime
 
 MAX_INACTIVE_TIME = 240
-#stage 0 - объяснение, кнопка начать -> 1
-#stage 1 - ввод tgid -> 2
-#stage 2 - ввод сообщения -> 3
-#stage 3 - подтверждение отправки, кнопка для изменения id, кнопка для изменения сообщ, кнопка отправить -> 4 || -> 5
-#stage 4 - изменение tgid -> 3
-#stage 5 - изменение message -> 3
+
+sendMethod = None
+def setup_sendMethod(method):
+    global sendMethod
+    sendMethod = method
 
 stage0_keyboard = VkKeyboard(one_time=True)
 stage0_keyboard.add_button("Начать", color=VkKeyboardColor.POSITIVE)
@@ -92,12 +91,22 @@ class User:
                 self.current_stage = 5
             elif event.text == "Отправить":
                 user_id = event.user_id
+                user_info = self.vk.users.get(user_ids=user_id, fields='first_name,last_name')[0]
+                full_sender_name = user_info['first_name'] + " " + user_info['last_name']
+                data = {
+                    "data": {
+                        "sender": full_sender_name,
+                        "recipient": self.reciever_id,
+                        "msg": self.msg_to_send
+                    }
+                }
                 self.vk.messages.send(
                         user_id=user_id,
                         message="Сообщение отправлено. Для отправки нового сообщения вам необходимо будет ввести Telegram Id получателя и текст сообщения. Нажмите Начать для продолжения",
                         keyboard=stage0_keyboard.get_keyboard(),
                         random_id = 0
                 )
+                sendMethod(data)
             else:
                 user_id = event.user_id
                 self.vk.messages.send(

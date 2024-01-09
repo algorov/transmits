@@ -16,10 +16,10 @@ class ServerObject
     // прослушивание входящих подключений
     protected internal async Task ListenAsync()
     {
-        Console.WriteLine($"Сервер запущен по адресу: {tcpListener.LocalEndpoint}");    
         try
         {
             tcpListener.Start();
+            Console.WriteLine($"Сервер запущен по адресу: {tcpListener.LocalEndpoint}");    
             Console.WriteLine("Сервер запущен. Ожидание подключений...");
  
             while (true)
@@ -29,6 +29,7 @@ class ServerObject
                 ClientObject clientObject = new ClientObject(tcpClient, this);
                 clients.Add(clientObject);
                 Task.Run(clientObject.ProcessAsync);
+                Console.WriteLine($"Клиент {tcpClient.Client.RemoteEndPoint} подключен");
             }
         }
         catch (Exception ex)

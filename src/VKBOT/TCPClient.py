@@ -14,7 +14,7 @@ class TCPClient:
 
     def send_data(self, data):
         if self.client_socket:
-            json_data = json.dumps(data)
+            json_data = json.dumps(data) + '\n'
             self.client_socket.send(json_data.encode('utf-8'))
 
     def receive_data_thread(self, callback):

@@ -25,7 +25,6 @@ class ClientObject
     {
         try
         {
-            // в бесконечном цикле получаем сообщения от клиента
             while (true)
             {
                 try
@@ -33,10 +32,12 @@ class ClientObject
                     var message = await Reader.ReadLineAsync();
                     if (message == null) 
                         continue;
+                    Console.WriteLine($"Сообщение получено: {message}");
                     await server.BroadcastMessageAsync(message, Id);
                 }
-                catch
+                catch(Exception e)
                 {
+                    Console.WriteLine(e.Message);
                     break;
                 }
             }
