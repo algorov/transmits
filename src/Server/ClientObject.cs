@@ -25,28 +25,18 @@ class ClientObject
     {
         try
         {
-            // получаем имя пользователя
-            string? userName = await Reader.ReadLineAsync();
-            string? message = $"{userName} вошел в чат";
-            // посылаем сообщение о входе в чат всем подключенным пользователям
-            await server.BroadcastMessageAsync(message, Id);
-            Console.WriteLine(message);
             // в бесконечном цикле получаем сообщения от клиента
             while (true)
             {
                 try
                 {
-                    message = await Reader.ReadLineAsync();
-                    if (message == null) continue;
-                    message = $"{userName}: {message}";
-                    Console.WriteLine(message);
+                    var message = await Reader.ReadLineAsync();
+                    if (message == null) 
+                        continue;
                     await server.BroadcastMessageAsync(message, Id);
                 }
                 catch
                 {
-                    message = $"{userName} покинул чат";
-                    Console.WriteLine(message);
-                    await server.BroadcastMessageAsync(message, Id);
                     break;
                 }
             }
