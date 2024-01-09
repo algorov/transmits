@@ -34,16 +34,16 @@ class Bot:
         else:
             return False
 
-    def build_json(self, id: int, data: list) -> str:
+    def build_json(self, nickname: str, data: list) -> str:
         this = {
             "data": {
-                "sender": id,
+                "sender": nickname,
                 "recipient": data[0],
                 "msg": data[1]
             }
         }
 
-        return json.dumps(this)+"\n"
+        return json.dumps(this) + "\n"
 
     def register_handlers(self) -> None:
         self.application.add_handler(CommandHandler("start", self.start_command))
@@ -95,7 +95,7 @@ class Bot:
                 step += 1
                 if step == 2:
                     if self.validate_data(data):
-                        self.out_queue.put(self.build_json(update.message.from_user.id, data))
+                        self.out_queue.put(self.build_json(update.message.from_user.full_name, data))
                         await update.message.reply_text("Сообщение отправлено! 🙄")
                     else:
                         await update.message.reply_text("Некорректные данные! 🤬")
