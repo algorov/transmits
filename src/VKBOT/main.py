@@ -25,7 +25,7 @@ def on_message_recieved(data):
     msg = data['msg']
     vk.messages.send(
         user_id = recipient,
-        message = "Получено сообщение от " + sender + "!\n" + msg,
+        message = "Получено сообщение от " + str(sender) + "!\n" + msg,
         random_id = 0
     )
 def on_send_data(data):

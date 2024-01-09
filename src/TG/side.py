@@ -20,7 +20,7 @@ def listen_server(rec_queue: queue.Queue, depart_queue: queue.Queue):
             try:
                 rec_data = bot_socket.recv(1024)
                 data = rec_data.decode('utf-8')
-                # print("Received data:", data)
+                print("Received data:", data)
                 rec_queue.put(data)
             except TimeoutError:
                 print("[ERROR] Timeout")

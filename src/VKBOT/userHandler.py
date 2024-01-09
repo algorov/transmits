@@ -107,6 +107,7 @@ class User:
                         random_id = 0
                 )
                 sendMethod(data)
+                self.current_stage = 0
             else:
                 user_id = event.user_id
                 self.vk.messages.send(
