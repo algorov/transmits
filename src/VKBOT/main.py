@@ -1,7 +1,8 @@
 import vk_api
 import userHandler
-from vk_api.longpoll import VkEventType, VkLongPoll
-from vk_api.keyboard import VkKeyboard, VkKeyboardColor
+import TCPClient
+import sys
+from vk_api.longpoll import VkLongPoll
 
 token = "vk1.a.5xSRIXg8uyq6ICFOJFJJHJ8Y7bZPSSZZEAIrV6-BytPnfZs1GDT4awdLccRunivkoMKP-eHiIEZRgXHHP4xlWuRvzZ0kpozd83CfvrflxWldpbQn_nRgEpcl_d22P8D5semFaFu8q-Fxx3YJZnde95BSk5JMQFnzd-3IKA8xo7pnOkaVn-HrMByFNuKq5DVV4gIFJ8F9q4sReLOXXm1adA"
 
