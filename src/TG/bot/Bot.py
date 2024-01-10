@@ -8,10 +8,10 @@ from dotenv import load_dotenv
 
 
 class Bot:
-    def __init__(self, in_queue: queue.Queue, out_queue: queue.Queue):
+    def __init__(self, in_msgs: dict, out_queue: queue.Queue):
         self.application = None
         self.bot_token = None
-        self.in_queue = in_queue
+        self.in_msgs = in_msgs
         self.out_queue = out_queue
 
         self.load_environment()
@@ -62,13 +62,22 @@ class Bot:
         )
 
     async def get_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-        if not self.in_queue.empty():
+        tg_id = str(update.message.from_user.id)
+        msgs = []
+
+        print(f'[GET] from {tg_id}:\n* MSGS DICT: {self.in_msgs}')
+
+        if tg_id in self.in_msgs:
             await update.message.reply_text("Для вас есть кое-что! ✅")
-            while not self.in_queue.empty():
-                json_format = self.in_queue.get()
+
+            msgs = [msg for date, msg in self.in_msgs[tg_id].items()]
+            for msg in msgs:
+                json_format = msg
                 data = json.loads(json_format)
                 await update.message.reply_markdown(
                     f'*От {data.get("data").get("sender")}:*\n {data.get("data").get("msg")}')
+
+            del self.in_msgs[tg_id]
         else:
             await update.message.reply_text("📌 Для вас пока нет ничего нового!")
 
